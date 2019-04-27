@@ -1,0 +1,7 @@
+DROP TABLE  IF EXISTS  users;
+CREATE TABLE users
+(
+    user VARCHAR(15) PRIMARY KEY NOT NULL,
+    pwd VARCHAR(20) NOT NULL,
+    flag INT
+);

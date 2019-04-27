@@ -1,15 +1,21 @@
 import  sqlite3
 
 import flask as fl
+import os,sys
 
-DATABASE = "videoplay.db"
-
+path = sys.path[0]
+DATABASE = path+"\\DATABASE"
+DATABASE_INIT_FILE = path+"\\init.sql"
 app = fl.Flask("post")
 
 
 def init_db():
     with app.app_context():
-        df = get_db()
+        db = get_db()
+        with   app.open_resource(DATABASE_INIT_FILE,'r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+        print("create database ")
 
 
 def make_dicts(cursor, row):  # 将查询返回的数据的转换为字典类型，这样会跟方便使用。此函数会在get_db()函数中用到，赋值给db.row_factory。
@@ -24,16 +30,29 @@ def get_db():  # 获取数据库连接
     return db  # 返回数据库连接，可能返回为None
 
 
-def connect_db():
-    rv = sqlite3.connect(DATABASE)
-
 
 @app.route('/test')
-def testdb():
+def db():
     db = get_db()
     if (db):
         return "hahahahaha"
 
+def execute(sql):
+    with app.app_context():
+        try:
+            db=  get_db()
+            cursor =db.execute(sql)
+            db.commit()
+            rv = cursor.fetchall()
+            cursor.close()
+            if(rv):
+                return rv
+        except Exception as e:
+            print(e)
+            return 500
+
+
 
 if __name__ == '__main__':
-    app.run()
+
+    execute('SELECT users.pwd from users WHERE users.user=admin;')
